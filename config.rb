@@ -1,3 +1,14 @@
+### 
+ # Created by anthony on 27.09.16.
+ ## 
+
+NCPU = 2
+
+
+HOST = '127.0.0.1'
+PORT = 8080
+
+
 DOCUMENT_ROOT = 'static'
 INDEX_PATH = 'index.html'
 

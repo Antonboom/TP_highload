@@ -1,1 +1,3 @@
-ruby server.rb
+```
+ruby httpd.rb --help
+```

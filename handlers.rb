@@ -7,30 +7,29 @@ require 'mimemagic/overlay'
 require 'uri'
 require 'date'
 
-require './config.rb'
+require './utils'
 
 
-def get_headers(status, type=nil, length=nil, last_modified=nil, allow=false)
-	headers = [
-		"#{PROTOCOL} #{status} #{STATUS_VALUE[status]}",
-	 	"Date: #{DateTime.now.strftime(HTTP_DATE_FORMAT)}",
-	 	"Server: #{SERVER_NAME}"
-	]
+def main_handler(client)
+  msg = client.gets.split
+  method = msg[0]
+  path = msg[1]
+  protocol = msg[2]
 
-	if status == 200
-		headers += [
-			"Content-Type: #{type}",
-			"Content-Length: #{length}",
-			"Last-Modified: #{last_modified}"
-		]
+  begin
+		case method
+		when 'GET'
+			get_handler(client, path)
+		when 'HEAD'
+			head_handler(client, path)
+		when 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE', 'TRACE', 'CONNECT'
+			not_allowed_handler(client)
+		else 
+			not_implemented_handler(client)
+		end
+	rescue IOError
+		client.close
 	end
-
-	if allow
-		headers += ["Allow: #{ALLOW_METHODS}"]
-	end
-
-	headers += ["Connection: #{CONNECTION_TOKEN}", "", ""]
-	headers.join("\r\n")
 end
 
 
