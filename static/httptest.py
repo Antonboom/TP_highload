@@ -46,7 +46,7 @@ class HttpServer(unittest.TestCase):
     self.conn.request("GET", "/httptest/dir1/")
     r = self.conn.getresponse()
     data = r.read()
-    self.assertEqual(int(r.status), 403)
+    self.assertEqual(int(r.status), 404)
 
   def test_file_not_found(self):
     """absent file returns 404"""
@@ -254,7 +254,7 @@ class HttpServer(unittest.TestCase):
     self.assertEqual(int(r.status), 200)
     self.assertEqual(int(length), 35344)
     self.assertEqual(len(data), 35344)
-    self.assertEqual(ctype, "application/x-shockwave-flash")
+    self.assertIn(ctype, ("application/vnd.adobe.flash.movie", "application/x-shockwave-flash"))
 
 loader = unittest.TestLoader()
 suite = unittest.TestSuite()

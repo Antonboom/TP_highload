@@ -12,9 +12,24 @@ require './utils'
 
 def main_handler(client)
   msg = client.gets.split
+  
   method = msg[0]
   path = msg[1]
   protocol = msg[2]
+
+  if !method || !path or !protocol
+  	client.puts get_headers(STATUS_FORBIDDEN)
+  	client.close
+  	return
+  end
+
+  path = path.gsub(/\?.*/, '')
+  
+  if path.include?('/../')
+  	client.puts get_headers(STATUS_FORBIDDEN)
+  	client.close
+  	return
+  end
 
   begin
 		case method

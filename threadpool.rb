@@ -5,7 +5,7 @@
 require 'thread'
 
 
-Thread.abort_on_exception = true
+# Thread.abort_on_exception = true
 
 
 class ThreadPool

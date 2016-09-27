@@ -35,11 +35,11 @@ puts "Listen #{host} on #{port}..."
 pool = ThreadPool.new ncpu
 
 
-Kernel.trap('INT') do
-  server.close
-  puts " - The server shuts down..."
-  exit
-end
+# Kernel.trap('INT') do
+#   server.close
+#   puts " - The server shuts down..."
+#   exit
+# end
 
 
 loop do 
