@@ -31,7 +31,7 @@ def main_handler(client)
   	return
   end
 
-  begin
+  	begin
 		case method
 		when 'GET'
 			get_handler(client, path)
@@ -42,8 +42,8 @@ def main_handler(client)
 		else 
 			not_implemented_handler(client)
 		end
-	rescue IOError
-		client.close
+	rescue
+		# client.close
 	end
 end
 

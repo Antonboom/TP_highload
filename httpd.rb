@@ -9,6 +9,8 @@ require './config'
 require './handlers'
 require './optparse'
 
+interrupt = false
+
 options = get_options()
 
 host = HOST
@@ -27,44 +29,56 @@ end
 
 ncpu = NCPU
 if options.has_key?(:ncpu)
-	ncpu = options[:ncpu]
+	ncpu = options[:ncpu].to_i
 end
-
+ncpu = [ncpu / 2, Concurrent.processor_count].min
 
 work_queue = Queue.new
 server = TCPServer.new host, port
 puts "Listen #{host} on #{port}..."
 
 
-pool = Concurrent::ThreadPoolExecutor.new(
-  :min_threads => [2, ncpu].max,
-  :max_threads => [2, ncpu].max,
-  :max_queue   => [2, ncpu].max * 100,
-  :fallback_policy => :caller_runs
-)
+ncpu.times do
+  fork
+end
 
 
-future = Concurrent::Future.execute(:executor => pool) do
-  while true
+# pool = Concurrent::CachedThreadPool.new(
+#   :min_threads => [2, ncpu * 2 + 1].max,
+#   :max_threads => [2, ncpu * 2 + 1].max,
+#   :max_queue   => [2, ncpu * 2 + 1].max * 5,
+#   :fallback_policy => :abort
+# )
+
+
+# future = Concurrent::Future.execute(:executor => pool) do
+
+
+# (ncpu * 2).times do
+thread = Thread.new {
+  	while true
 		if !work_queue.empty?
 			client = work_queue.pop(true) rescue nil
 			if client
 				main_handler(client)
 			end
-	  end
+	 	end
+
+	 	if interrupt
+	 		break
+	 	end
 	end
-end
+}
+# end
 
 
-loop do 
-  work_queue << server.accept  
-end
-
-
-Kernel.trap('INT') do
-  server.close
-  puts " - The server shuts down..."
-  pool.shutdown
-  main_thread.exit
-  exit
+begin
+	loop do 
+	  	work_queue << server.accept  
+	end
+rescue Interrupt => e
+	interrupt = true
+	server.close
+	puts " - The server shuts down..."
+	thread.join
 end
